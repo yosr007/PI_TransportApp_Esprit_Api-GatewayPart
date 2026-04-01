@@ -1,0 +1,93 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          # ── Global CORS for Angular frontend ──────────────────
+          globalcors:
+            corsConfigurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:4200"    # Angular dev server
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+                maxAge: 3600
+
+          # ── Routes ────────────────────────────────────────────
+          routes:
+            - id: forum-service
+              uri: lb://FORUM-SERVICE
+              predicates:
+                - Path=/api/forum/**
+                
+            - id: auth-service
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/api/v1/auth/**,/api/v1/users/**
+
+            - id: booking-service
+              uri: lb://BOOKING-SERVICE
+              predicates:
+                - Path=/api/v1/bookings/**,/api/v1/tickets/**    # Fixed: matches actual controller paths (plural)
+
+            - id: reclamation-service
+              uri: lb://RECLAMATION-SERVICE
+              predicates:
+                - Path=/api/v1/reclamation/**
+
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/v1/payments/**,/api/v1/refunds/**    # Fixed: added /refunds/** for RefundController
+
+            - id: fleet-service
+              uri: lb://FLEET-SERVICE
+              predicates:
+                - Path=/api/v1/fleet/**
+
+            # ── Block internal endpoints from external access ──
+            - id: block-internal
+              uri: no://op
+              predicates:
+                - Path=/internal/**
+              filters:
+                - SetStatus=403
+
+          # ── Discovery ─────────────────────────────────────────
+          discovery:
+            locator:
+              enabled: false                   # Fixed: was true — auto-exposes all services bypassing security
+              lower-case-service-id: true
+
+jwt:
+  secret: ${JWT_SECRET}   # Defaults to hardcoded value if env var not set
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://admin:admin123@localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,metrics
+  endpoint:
+    gateway:
+      enabled: true    # ← add this line
+  tracing:
+    sampling:
+      probability: 1.0
