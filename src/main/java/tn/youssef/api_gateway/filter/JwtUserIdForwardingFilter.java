@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import java.util.List;
 
 @Component
 public class JwtUserIdForwardingFilter implements GlobalFilter, Ordered {
@@ -28,8 +27,8 @@ public class JwtUserIdForwardingFilter implements GlobalFilter, Ordered {
                     // Extract the subject (user ID) from the JWT claims
                     String userId = jwt.getSubject();
 
-                    // Extract roles from JWT claims
-                    Object rolesClaim = jwt.getClaim("roles");
+                    // Extract roles from JWT claims (user-service stores under "role" as a single string)
+                    Object rolesClaim = jwt.getClaim("role");
                     String rolesHeader = extractRolesHeader(rolesClaim);
 
                     if (userId != null) {
