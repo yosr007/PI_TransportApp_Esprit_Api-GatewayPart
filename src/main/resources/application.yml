@@ -7,6 +7,19 @@ spring:
 
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
       server:
         webflux:
           # ── Routes ────────────────────────────────────────────
@@ -19,7 +32,7 @@ spring:
             - id: auth-service
               uri: lb://AUTH-SERVICE
               predicates:
-                - Path=/api/v1/auth/**,/api/v1/users/**
+                - Path=/api/v1/auth/**,/api/v1/users/**,/uploads/**
 
             - id: booking-service
               uri: lb://BOOKING-SERVICE
