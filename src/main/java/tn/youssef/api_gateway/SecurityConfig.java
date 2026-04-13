@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .authorizeExchange(ex -> ex
                         .pathMatchers("/api/v1/auth/**").permitAll()
                         .pathMatchers("/api/v1/users/**").permitAll()
+                        .pathMatchers("/api/v1/settings/**").permitAll()
                         .pathMatchers("/uploads/**").permitAll()      // ← add this
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/fallback/**").permitAll()
